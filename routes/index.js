@@ -1,9 +1,11 @@
-var express = require('express');
-var router = express.Router();
+/**
+ * 所有路由接口
+ */
+const user = require('./user');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
-
-module.exports = router;
+module.exports = app => {
+    app.post('/register', user.register);
+    app.post('/login', user.login);
+    app.post('/delUser', user.delUser);
+    app.get('/getUserList', user.getUserList);
+}
