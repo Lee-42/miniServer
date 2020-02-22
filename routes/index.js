@@ -13,12 +13,15 @@ module.exports = app => {
     app.get('/getUserList', user.getUserList);
 
     app.post('/addArticle', article.addArticle);
-    // app.post('/updateArticle', article.updateArticle);
-    
-    
+    app.post('/updateArticle', article.updateArticle);
+    app.post('/delArticle', article.delArticle);
+    app.get('/getArticleLIst', article.getArticleList);
+    app.get('/getArticleListAdmin', article.getArticleListAdmin);
+    app.post('/getArticleDetail', article.getArticleDetail);
+
     app.post('/addTag', tag.addTag);
     app.post('/delTag', tag.delTag);
-    app.get('//getTagList', tag.getTagList);
+    app.get('/getTagList', tag.getTagList);
 
     app.post('/addCategory', category.addCategory);
     app.post('/delCategory', category.delCategory);

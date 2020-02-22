@@ -144,9 +144,9 @@ exports.delUser = (req, res) => {
     let { id } = req.body;
     User.deleteMany({ _id: id })
         .then(result => {
-            if(result.n === 1){
+            if (result.n === 1) {
                 responseClient(res, 200, 0, '用户删除成功');
-            }else {
+            } else {
 
                 responseClient(res, 200, 1, '用户不存在');
             }
