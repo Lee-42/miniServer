@@ -142,3 +142,58 @@ exports.addThirdComment = (req, res) => {
         responseClient(res);
       });
 };
+
+
+// 管理一级评论
+exports.changeComment = (req, res) => {
+  let { id, state } = req.body;
+  Comment.updateOne(
+    { _id: id },
+    {
+      state: Number(state),
+      is_handle: 1,
+    },
+  )
+    .then(result => {
+      responseClient(res, 200, 0, '操作成功', result);
+    })
+    .catch(err => {
+      console.error('err: ', err);
+      responseClient(res);
+    });
+};
+
+// 管理第三者评论
+exports.changeThirdComment = (req, res) => {
+  let { id, state, index } = req.body;
+  Comment.findById({
+    _id: id,
+  })
+    .then(commentResult => {
+      let i = index ? Number(index) : 0;
+      if(commentResult.other_comments.length){
+        commentResult.other_comments[i].state = Number(state);
+        Comment.updateOne(
+          { _id: id },
+          { 
+            other_comments: commentResult.other_comments,
+            is_handle: 1,
+          },
+        )
+          ,then(result => {
+            responseClient(res, 200, 0, '操作成功', result);
+          })
+            .catch(err1 => {
+              console.error('err1: ', err1); 
+              responseClient(res);
+            });
+      }else {
+        responseClient(res, 200, 1, '第三方评论不存在', result);
+      }
+    })
+    .catch(error2 => {
+      console.log('error2: ', error2 );
+      responseClient(res);
+    });
+};
+
