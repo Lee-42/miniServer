@@ -5,6 +5,7 @@ const user = require('./user');
 const article = require('./article');
 const tag = require('./tag');
 const category = require('./category');
+const comment = require('./comment');
 
 module.exports = app => {
     app.post('/register', user.register);
@@ -18,7 +19,11 @@ module.exports = app => {
     app.get('/getArticleLIst', article.getArticleList);
     app.get('/getArticleListAdmin', article.getArticleListAdmin);
     app.post('/getArticleDetail', article.getArticleDetail);
+    app.post('/likeArticle', article.likeArticle);
 
+    app.post('/addComment', comment.addComment);
+    app.post('/addThirdComment', comment.addThirdComment);
+    
     app.post('/addTag', tag.addTag);
     app.post('/delTag', tag.delTag);
     app.get('/getTagList', tag.getTagList);

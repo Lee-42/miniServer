@@ -342,20 +342,23 @@ exports.getArticleDetail = (req, res) => {
     let { id } = req.body;
     let type = Number(req.body.type) || 1; //文章类型 => 1: 普通文章，2: 简历，3: 管理员介绍
     let filter = Number(req.body.filter) || 1; //文章的评论过滤 => 1: 过滤，2: 不过滤
+    console.log('type:', type);
+    console.log("filter: ", filter);
+    
     if (type === 1) {
         if (!id) {
-            responseClient(res, 200, 1, '文章不存在');
+            responseClient(res, 200, 1, '文章不存在 ！');
             return;
         }
-        Article.findOne({ _id: id }, (error, data) => {
-                if (error) {
-                    console.error('Error: ' + error);
+        Article.findOne({ _id: id }, (Error, data) => {
+                if (Error) {
+                    console.error('Error:' + Error);
                     // throw error;
                 } else {
                     data.meta.views = data.meta.views + 1;
                     Article.updateOne({ _id: id }, { meta: data.meta })
                         .then(result => {
-                            // console.log('data: ', data);
+                            console.log('data:',data)
                             if (filter === 1) {
                                 const arr = data.comments;
                                 for (let i = arr.length - 1; i >= 0; i--) {
@@ -375,22 +378,25 @@ exports.getArticleDetail = (req, res) => {
                                     }
                                 }
                             }
-                            responseClient(res, 200, 0, '操作成功!', data);
+
+                            responseClient(res, 200, 0, '操作成功 ！', data);
                         })
                         .catch(err => {
-                            console.log('err: ', err);
+                            console.error('err :', err);
                             throw err;
                         });
                 }
             })
-            // .populate([{ path: 'tags' }, { path: 'category' }, { path: 'commentss' }])
-            // .exec((err, doc) => {
-            //     //
-            // });
+            .populate([{ path: 'tags' }, { path: 'category' }, { path: 'comments' }])
+            .exec((err, doc) => {
+                // console.log("doc:");          // aikin
+                // console.log("doc.tags:",doc.tags);          // aikin
+                // console.log("doc.category:",doc.category);           // undefined
+            });
     } else {
-        Article.findOne({ type: type }, (error, data) => {
-                if (error) {
-                    console.log('Error: ' + error);
+        Article.findOne({ type: type }, (Error, data) => {
+                if (Error) {
+                    console.log('Error:' + Error);
                     // throw error;
                 } else {
                     if (data) {
@@ -399,7 +405,7 @@ exports.getArticleDetail = (req, res) => {
                             .then(result => {
                                 if (filter === 1) {
                                     const arr = data.comments;
-                                    for (let i = arr.length; i >= 0; i--) {
+                                    for (let i = arr.length - 1; i >= 0; i--) {
                                         const e = arr[i];
                                         if (e.state !== 1) {
                                             arr.splice(i, 1);
@@ -416,24 +422,26 @@ exports.getArticleDetail = (req, res) => {
                                         }
                                     }
                                 }
-                                responseClient(res, 200, 0, '操作成功!', data);
+                                responseClient(res, 200, 0, '操作成功 ！', data);
                             })
                             .catch(err => {
-                                console.error('err: ', err);
+                                console.error('err :', err);
                                 throw err;
                             });
                     } else {
-                        responseClient(res, 200, 1, '文章不存在！');
+                        responseClient(res, 200, 1, '文章不存在 ！');
                         return;
                     }
                 }
             })
-            // .populate([{ path: 'tags' }, { path: 'category' }, { path: 'commentss' }])
-            // .exec((err, doc) => {
-            //     //
-            // });
+            .populate([{ path: 'tags' }, { path: 'category' }, { path: 'comments' }])
+            .exec((err, doc) => {
+                // console.log("doc:");          // aikin
+                // console.log("doc.tags:",doc.tags);          // aikin
+                // console.log("doc.category:",doc.category);           // undefined
+            });
     }
-}
+};
 
 // 更新文章
 exports.updateArticle = (req, res) => {
@@ -470,5 +478,51 @@ exports.updateArticle = (req, res) => {
         .catch(err => {
             console.error(err);
             responseClient(res);
+        });
+};
+
+//文章点赞
+exports.likeArticle = (req, res) => {
+    // console.log('on Like');
+    // console.log(req.session);
+    if(!req.session.userInfo){
+        responseClient(res, 200, 1, "您还没登录, 或者登录信息已经过期, 请重新登录!");
+        return;
+    }
+    let { id, user_id } = req.body;
+    Article.findOne({ _id: id })
+        .then(data => {
+            let fields = {};
+            data.meta.likes = data.meta.likes + 1;
+            fields.meta = data.meta;
+            let like_users_arr = data.like_user.length ? data.like_users : [];
+            User.findOne({ _id: user_id })
+                .then(user => {
+                    let new_like_user = {};
+                    new_like_user.id = user._id;
+                    new_like_user.name = user.name;
+                    new_like_user.avatar = user.avatar;
+                    new_like_user.create_time = user.create_time;
+                    new_like_user.type = user.type;
+                    new_like_user.introduce = user.introduce;
+                    like_users_arr.push(new_like_user);
+                    fields.like_users = like_users_arr;
+                    Article.updata({ _id: id }, fields)
+                        .then(result => {
+                            responseClient(res, 200, 0, '操作成功！', result);
+                        })
+                        .catch(err => {
+                            console.error('err: ', err);
+                            throw err;
+                        })
+                })
+                .catch(err => {
+                    responseClient(res);
+                    console.error('err 1: ', err);
+                });
+        })
+        .catch(err => {
+            responseClient(res);
+            console.error('err 2:', err);
         });
 };
