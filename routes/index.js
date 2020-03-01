@@ -6,6 +6,8 @@ const article = require('./article');
 const tag = require('./tag');
 const category = require('./category');
 const comment = require('./comment');
+const project = require('./project');
+const message = require('./message');
 
 module.exports = app => {
     app.post('/register', user.register);
@@ -31,4 +33,14 @@ module.exports = app => {
     app.post('/addCategory', category.addCategory);
     app.post('/delCategory', category.delCategory);
     app.get('/getCategoryList', category.getCategoryList);
+
+    app.get('/getProjectList', project.getProjectList);
+    app.post('/addProject', project.addProject);
+    app.post('/updateProject', project.updateProject);
+
+    app.get('/getMessageLIst', message.getMessageList);
+    app.post('/addMessage', message.addMessage);
+    app.post('/addReplyMessage', message.addReplyMessage);
+    app.post('/delMessage', message.delMessage);
+    app.post('/getMessageDetail', message.getMessageDetail);
 }
